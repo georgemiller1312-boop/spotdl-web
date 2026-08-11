@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-clay-bg text-clay-ink font-body antialiased;
+    background-image: radial-gradient(circle at 15% 10%, #EFEBFB 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #D6CEEF 0%, transparent 50%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 {
+    @apply font-display;
+  }
+
+  /* Visible keyboard focus everywhere, clay-styled instead of a harsh ring */
+  :focus-visible {
+    outline: 3px solid #2F6B4F;
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  ::selection {
+    background-color: #2F6B4F;
+    color: #EFEBFB;
+  }
+
+  /* Soft clay-toned scrollbar for the track list */
+  .clay-scroll::-webkit-scrollbar {
+    width: 10px;
+  }
+  .clay-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .clay-scroll::-webkit-scrollbar-thumb {
+    background-color: #C4BADD;
+    border-radius: 999px;
+  }
+}
+
+@layer utilities {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

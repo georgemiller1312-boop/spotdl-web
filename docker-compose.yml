@@ -1,0 +1,56 @@
+services:
+  spotdl-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spotdl-web
+    restart: unless-stopped
+    ports:
+      - "8811:8000"
+    environment:
+      # One or more named save locations, as Name:/container-path pairs
+      # separated by commas. Each path must be mounted below in `volumes:`.
+      # The web UI shows these as buttons and lets you pick one per download;
+      # the first one is used by default. To save to a NAS/another machine
+      # by IP, mount it as a second path here (see the commented example
+      # under `volumes:` below) and add it to this list, e.g.:
+      #   DOWNLOAD_DESTINATIONS: "Music:/music,NAS (192.168.1.50):/nas-music"
+      DOWNLOAD_DESTINATIONS: "Music:/music"
+
+      SPOTDL_FORMAT: mp3
+      SPOTDL_BITRATE: 320k
+      SPOTDL_THREADS: "4"
+      # Optional: only needed if you want to use your own Spotify Developer
+      # app instead of spotdl's built-in default credentials.
+      # SPOTIFY_CLIENT_ID: ""
+      # SPOTIFY_CLIENT_SECRET: ""
+
+      # Set BOTH of these before running `tailscale funnel` — they add a
+      # username/password prompt in front of the whole site. Leave unset
+      # for Tailscale-only access (the tailnet is the access control then).
+      SITE_USERNAME: "george"
+      SITE_PASSWORD: "change-me-before-going-public"
+    volumes:
+      - /DATA/Media/Music:/music
+      # Second destination example — a NAS/share mounted on the HOST at
+      # some path, bind-mounted straight through. Simplest option if you
+      # already have it mounted via fstab/autofs:
+      # - /mnt/nas-192.168.1.50/Music:/nas-music
+
+      # If it ISN'T already mounted on the host, Docker can mount an SMB
+      # share by IP directly (requires cifs-utils on the host: on Fedora,
+      # `sudo dnf install cifs-utils`). Replace the `volumes:` block above
+      # with a named volume instead, and add this at the bottom of this
+      # file (top-level, same indent as `services:`):
+      #
+      # volumes:
+      #   nas-music:
+      #     driver_opts:
+      #       type: cifs
+      #       o: "username=YOUR_USER,password=YOUR_PASS,vers=3.0"
+      #       device: "//192.168.1.50/Music"
+      #
+      # ...then mount it here as `- nas-music:/nas-music`.
+
+      # Persists download history (SQLite) across container restarts.
+      - /DATA/Downloads/spotdl-web/data:/data
