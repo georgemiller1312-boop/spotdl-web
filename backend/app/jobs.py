@@ -22,7 +22,7 @@ from spotdl.utils.m3u import create_m3u_file
 
 from . import history
 from . import network_dest
-from .config import DOWNLOAD_FORMAT, output_template_for
+from .config import DOWNLOAD_FORMAT, OUTPUT_SUFFIX, output_template_for
 from .network_dest import NetworkTarget
 from .playlist_service import track_key
 
@@ -94,7 +94,7 @@ def _write_m3u(
         return None
 
     safe_name = sanitize_string(playlist_name)
-    m3u_path = Path(destination_path) / safe_name / f"{safe_name}.m3u"
+    m3u_path = Path(destination_path) / f"{safe_name}.m3u"
     create_m3u_file(str(m3u_path), existing, output_template, DOWNLOAD_FORMAT)
     return m3u_path, len(existing)
 
@@ -146,7 +146,9 @@ async def run_job(
         logger.exception("Failed to persist history for job %s", job_id)
 
 
-RELATIVE_TEMPLATE = "{list-name}/{artists} - {title}.{output-ext}"
+# Same shape as the local OUTPUT_SUFFIX: no per-playlist subfolder, files go
+# straight into the destination (here, the SMB share/subfolder root).
+RELATIVE_TEMPLATE = OUTPUT_SUFFIX
 
 
 async def run_job_network(
@@ -201,11 +203,11 @@ async def run_job_network(
         )
         if existing_locally:
             safe_name = sanitize_string(job["playlist_name"])
-            local_m3u = staging / safe_name / f"{safe_name}.m3u"
+            local_m3u = staging / f"{safe_name}.m3u"
             create_m3u_file(
                 str(local_m3u), existing_locally, output_template_for(str(staging)), DOWNLOAD_FORMAT
             )
-            remote_m3u_path = f"{safe_name}/{safe_name}.m3u"
+            remote_m3u_path = f"{safe_name}.m3u"
             await asyncio.to_thread(network_dest.upload_file, target, local_m3u, remote_m3u_path)
             job["m3u_path"] = f"{target.unc_path(remote_m3u_path)}"
             job["m3u_track_count"] = len(existing_locally)

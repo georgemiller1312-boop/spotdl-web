@@ -37,11 +37,11 @@ BITRATE = os.environ.get("SPOTDL_BITRATE", "320k")
 # How many songs to download concurrently.
 THREADS = int(os.environ.get("SPOTDL_THREADS", "4"))
 
-# Songs are organised as <destination>/<Playlist Name>/<Artist> - <Title>.mp3
-# so the whole playlist folder (audio + .m3u) can be dropped straight into
-# Plex/Jellyfin/etc. Keep the {list-name} segment first — jobs.py relies on
-# this exact shape to check what has already been downloaded.
-OUTPUT_SUFFIX = "{list-name}/{artists} - {title}.{output-ext}"
+# Songs are written straight into <destination> (no per-playlist subfolder),
+# as <destination>/<Artist> - <Title>.mp3, with the .m3u alongside them in
+# that same folder. jobs.py relies on this exact shape (no leading path
+# segment before the filename) to check what has already been downloaded.
+OUTPUT_SUFFIX = "{artists} - {title}.{output-ext}"
 
 
 def output_template_for(destination_path: str) -> str:
